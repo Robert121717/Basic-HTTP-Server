@@ -1,26 +1,3 @@
-"""
-- CS2911 - 041
-- Fall 2022
-- Lab 6
-- Names:
-  - Adam Buker
-  - Robert Schmidt
-
-An HTTP server
-
-Introduction: (Describe the lab in your own words)
-
-
-
-
-Summary: (Summarize your experience with the lab, what you learned, what you liked,what you disliked, and any suggestions you have for improvement)
-
-
-
-
-
-"""
-
 import socket
 import threading
 import os
@@ -89,17 +66,17 @@ def process_request(request_socket):
         response_body = create_response_body(resource_path)
         response += response_body
 
-    print("Response:", response)
     request_socket.sendall(response)
     request_socket.close()
 
 
 def read_request(request_socket):
     """
-
+    Checks to see if the request sent has a valid status line
     :author: Robert Schmidt
-    :param: request_socket:
-    :return:
+    :param: request_socket: socket representing TCP connection from the HTTP client_socket
+    :return: status code and resource path of the request
+    :rtype: int, str
     """
     resource_path = None
     try:
@@ -120,10 +97,11 @@ def read_request(request_socket):
 
 def read_status_line(request_socket):
     """
-
+    Parses the status line and checks to see if every element of the line is valid
     :author: Robert Schmidt
-    :param: request_socket:
-    :return:
+    :param: request_socket: socket representing TCP connection from the HTTP client_socket
+    :return: status code and resource path
+    :rtype: int, str
     """
     resource_path = None
 
@@ -146,20 +124,18 @@ def read_status_line(request_socket):
 
 def check_request(request):
     """
-
+    Checks to see what the request type is and returns the appropriate status code
     :author: Adam Buker
-    :param: request:
-    :return:
+    :param: str request: Clients request type
+    :return: the status code based on the request type
+    :rtype: int
     """
-    # expected request type
     if request == 'GET':
         status_code = 200
 
-    # unsupported but common request type
     elif request == 'POST' or 'PUT' or 'PATCH' or 'DELETE':
         status_code = 405
 
-    # unknown request type
     else:
         status_code = 400
 
@@ -168,10 +144,11 @@ def check_request(request):
 
 def check_resource(resource):
     """
-
+    Checks to see if the resource exists in the project's directory
     :author: Adam Buker
-    :param: resource:
-    :return:
+    :param: resource: Resource requested by client
+    :return: error code relative to requested resource, resource path
+    :rtype: int, str
     """
     code = 200
     if resource == '/' or resource == '/index.html':
@@ -188,10 +165,11 @@ def check_resource(resource):
 
 def read_headers(request_socket):
     """
-
+    Reads the lines in the header and checks to see if it contains a host line
     :author: Robert Schmidt
-    :param: request_socket:
-    :return:
+    :param: request_socket: socket representing TCP connection from the HTTP client_socket
+    :return: status code and the headers in the client request
+    :rtype: int, str
     """
     contains_host = False
     code = 200
@@ -201,7 +179,6 @@ def read_headers(request_socket):
     while line != '':
         line = read_line(request_socket)
 
-        # avoid IndexError if line is an empty string
         if line != '':
             contents_split = line.split(':')
 
@@ -222,10 +199,10 @@ def read_headers(request_socket):
 
 def print_request_headers(request_headers):
     """
-
+    Prints headers from the format of the dictionary
     :author: Adam Buker
-    :param: request_headers:
-    :return:
+    :param: request_headers: Dictionary containing request headers
+    :return: None
     """
     print('\n\033[4mReceived Headers\033[0m')
 
@@ -235,10 +212,11 @@ def print_request_headers(request_headers):
 
 def create_status_line(status_code):
     """
-
+    Creates the status line using the status code and relative message
     :author: Robert Schmidt
-    :param: status_code:
-    :return:
+    :param: status_code: Status code relative to client request
+    :return: the response status line followed by \r\n
+    :rtype: byte
     """
     version = 'HTTP/1.1'
     status_msg = get_status_message(status_code)
@@ -249,10 +227,11 @@ def create_status_line(status_code):
 
 def get_status_message(status_code):
     """
-
+    Associates a message with the correct status code.
     :author: Adam Buker
-    :param: status_code:
-    :return:
+    :param: status_code: Status code relative to client request.
+    :return: status message
+    :rtype: str
     """
     status_msg = ''
     if status_code == 200:
@@ -275,11 +254,12 @@ def get_status_message(status_code):
 
 def create_response_headers(status_code, resource_path):
     """
-
+    Combines the lines of the header and adds them to a dictionary
     :author: Robert Schmidt
-    :param: status_code:
-    :param: resource_path:
-    :return:
+    :param: status_code: Status code relative to client request
+    :param: resource_path: Project path of resource requested by client.
+    :return: Dictionary of response headers
+    :rtype: dict
     """
     headers = dict()
     headers['Date: '] = get_date() + '\r\n'
@@ -297,10 +277,11 @@ def create_response_headers(status_code, resource_path):
 
 def create_response_body(resource_path):
     """
-
+    Reads from a file using a given resource path
     :author: Adam Buker
-    :param: resource_path:
-    :return:
+    :param: resource_path: Project path of resource requested by client.
+    :return: The file's content
+    :rtype: byte
     """
     file = open(resource_path, 'br').read()
 
@@ -309,10 +290,11 @@ def create_response_body(resource_path):
 
 def read_header_dictionary(header_dictionary):
     """
-
+    Concatenates the given dictionaries keys and values into a string.
     :author: Adam Buker
-    :param: header_dictionary:
-    :return:
+    :param: header_dictionary: Dictionary of headers to include in the server response.
+    :return: Headers in the given dictionary followed by \r\n
+    :rtype: str
     """
     headers = ''
     for k, v in header_dictionary.items():
@@ -323,10 +305,11 @@ def read_header_dictionary(header_dictionary):
 
 def read_line(request_socket):
     """
-
+    Reads a line of bytes until \r\n
     :author: Robert Schmidt
-    :param: request_socket:
-    :return:
+    :param: request_socket: socket representing TCP connection from the HTTP client_socket
+    :return: The data read up to \r\n
+    :rtype: str
     """
     prev_byte, temp, data = '', '', ''
 
@@ -341,18 +324,17 @@ def read_line(request_socket):
 
 def next_byte(request_socket):
     """
-
     :author: Adam Buker
-    :param: request_socket:
-    :return:
+    Read the next byte from the SSLSocket data_socket.
+    If the byte has not yet arrived, this method blocks (waits) until the byte arrives.
+    If the sender is done sending and is waiting for your response, this method blocks indefinitely.
+
+    :param: SSLSocket tcp_socket: The socket to read from. The tcp_socket argument should be an open tcp
+                        data connection (either a client socket or a server data socket), not a tcp
+                        server's listening socket.
+    :return: The next byte, as a bytes object with a single byte in it.
     """
     return request_socket.recv(1)
-
-
-# ** Do not modify code below this line.  You should add additional helper methods above this line.
-
-# Utility functions
-# You may use these functions to simplify your code.
 
 
 def get_date():
@@ -381,7 +363,7 @@ def get_file_size(file_path):
     Try to get the size of a file (resource) as number of bytes, given its path
 
     :param: file_path: string containing path to (resource) file, such as './abc.html'
-    :return: If file_path designates a normal file, an integer value representing the the file size in bytes
+    :return: If file_path designates a normal file, an integer value representing the file size in bytes
              Otherwise (no such file, or path is not a file), None
     :rtype: int or None
     """
