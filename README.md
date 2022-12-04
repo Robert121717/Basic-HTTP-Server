@@ -1,7 +1,7 @@
 ## License
 Basic HTTP server to demonstrate the process of sending resources requested by a client.
 
-Copyright (C) 2022 schmidtrj
+Copyright (C) 2022 Robert121717, bukeradam
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
