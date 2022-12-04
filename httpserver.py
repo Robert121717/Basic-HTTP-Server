@@ -45,11 +45,7 @@ def http_server_setup(port):
 def process_request(request_socket):
     """
     Process a single HTTP request, running on a newly started thread.
-
     Closes request socket after sending response.
-
-    Should include a response header indicating NO persistent connection
-
     :author: Robert Schmidt
     :param: request_socket: socket representing TCP connection from the HTTP client_socket
     :return: None
@@ -108,14 +104,11 @@ def read_status_line(request_socket):
     status_line = read_line(request_socket)
     contents_split = status_line.split(' ')
 
-    # check for valid request type i.e. 'GET'
     status_code = check_request(contents_split[0])
 
     if status_code == 200:
-        # check that the requested resource exists
         status_code, resource_path = check_resource(contents_split[1])
 
-    # check the HTTP version of the request
     if contents_split[2] != 'HTTP/1.1':
         status_code = 505
 
@@ -156,7 +149,6 @@ def check_resource(resource):
     else:
         resource_path = '.' + resource
 
-    # ensure the resource exists before returning it
     if not os.path.exists(resource_path):
         code = 404
 
@@ -165,7 +157,7 @@ def check_resource(resource):
 
 def read_headers(request_socket):
     """
-    Reads the lines in the header and checks to see if it contains a host line
+    Parses and validates the headers received from the client.
     :author: Robert Schmidt
     :param: request_socket: socket representing TCP connection from the HTTP client_socket
     :return: status code and the headers in the client request
@@ -308,7 +300,7 @@ def read_line(request_socket):
     Reads a line of bytes until \r\n
     :author: Robert Schmidt
     :param: request_socket: socket representing TCP connection from the HTTP client_socket
-    :return: The data read up to \r\n
+    :return: The data read
     :rtype: str
     """
     prev_byte, temp, data = '', '', ''
